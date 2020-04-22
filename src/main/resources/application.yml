@@ -5,10 +5,12 @@ spring:
   application:
     name: amida-hapi
   jpa:
+    database: POSTGRESQL
     hibernate:
       ddl-auto: create-drop
     properties:
       hibernate.jdbc.batch_size: 20
+      hibernate.jdbc.lob.non_contextual_creation: true
       hibernate.cache.use_query_cache: false
       hibernate.cache.use_second_level_cache: false
       hibernate.cache.use_structured_entries: false
@@ -18,9 +20,14 @@ spring:
       hibernate.search.lucene_version: LUCENE_55
       hibernate.search.model_mapping: ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory
 
-  h2:
-    console:
-      enabled: true
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/hapi-db
+  #    used by hikari data pool instead of url
+    jdbc-url: jdbc:postgresql://localhost:5432/hapi-db
+    username: postgres
+    password: pass
+    platform: postgresql
 hapi:
   fhir:
     version: r4

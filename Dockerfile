@@ -1,7 +1,7 @@
 FROM openjdk:8-jdk-alpine as builder
 WORKDIR /app
 COPY . /app/
-RUN ./gradlew clean build
+RUN ./gradlew clean build -x test
 RUN cp /app/build/libs/*.jar /app/build/libs/app.jar
 
 FROM openjdk:8-jdk-alpine

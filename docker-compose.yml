@@ -1,0 +1,13 @@
+version: '2'
+services:
+  postgres:
+    image: postgres:12.2-alpine
+    environment:
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: hapi-db
+  hapi:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    environment: 
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hapi-db
