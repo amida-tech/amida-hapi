@@ -5,6 +5,7 @@ spring:
   application:
     name: amida-hapi
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: create-drop
     properties:
