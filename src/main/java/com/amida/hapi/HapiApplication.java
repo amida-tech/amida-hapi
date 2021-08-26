@@ -6,29 +6,27 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.apache.catalina.webresources.FileResource;
 import org.apache.commons.io.FileUtils;
-import org.apache.lucene.document.Field;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ResourceCondition;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import java.io.File;
-import java.io.FileReader;
 import java.util.Arrays;
 import java.util.HashMap;
 
-@SpringBootApplication
-public class HapiApplication {
+@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
+public class HapiApplication extends SpringBootServletInitializer {
 
     private FhirContext dstu2 = FhirContext.forDstu2();
     private IParser jsonParser = dstu2.newJsonParser();
     private FhirValidator validator = dstu2.newValidator();
-    private String serverBase = "http://localhost:8080/fhir";
+    private String serverBase = "http://hapi-fhir:8080/fhir";
     private IGenericClient client = dstu2.newRestfulGenericClient(serverBase);
 
     public static void main(String[] args) {
@@ -83,14 +81,10 @@ public class HapiApplication {
                             System.out.println(f.getName());
                             e.printStackTrace();
                         }
-
-
                     }
                 }
             }
 
         };
     }
-
-
 }

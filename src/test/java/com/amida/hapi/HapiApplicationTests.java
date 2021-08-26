@@ -11,6 +11,7 @@ public class HapiApplicationTests {
 
     @Test
     public void contextLoads() {
+        assert true;
     }
 
 }
