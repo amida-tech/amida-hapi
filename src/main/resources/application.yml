@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 9081
 
 spring:
   application:
@@ -43,3 +43,47 @@ hapi:
 management:
   security:
     enabled: false
+
+security:
+  oauth2:
+    resource:
+      jwk:
+        key-set-uri: http://keycloak:9080/auth/realms/igia/protocol/openid-connect/certs # required for scope enforcement
+      jwt:
+        key-uri: http://keycloak:9080/auth/realms/igia
+
+hspc:
+  platform:
+    api:
+      security:
+        # determines if security is applied at the contextPath, options are secured, mock or open
+        mode: secured
+      oauth2: # these values are placeholders required by HSPC library
+        clientId:
+        clientSecret:
+        scopes:
+    authorization:
+      protocol: http #https
+      host: ${AUTH_HOST:hapi-fhir}
+      port: ${AUTH_PORT:9081}
+      context: ~
+      url: ${hspc.platform.authorization.protocol}://${hspc.platform.authorization.host}:${hspc.platform.authorization.port}${hspc.platform.authorization.context}
+      authorizeUrlPath: /auth/realms/igia/protocol/openid-connect/auth
+      tokenUrlPath: /auth/realms/igia/protocol/smart-openid-connect/token
+      tokenCheckUrlPath: /auth/realms/igia/protocol/openid-connect/token/introspect
+      userinfoUrlPath: /auth/realms/igia/protocol/openid-connect/userinfo
+      smart:
+        launchUrlPath: #placeholder required by library but not implemented in auth server
+        registrationEndpointUrlPath: /auth/realms/igia/clients-registrations/openid-connect
+        urisEndpointExtensionUrl: http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris
+        launchRegistrationUrl: #placeholder required by library but not implemented in auth server
+        # comma separate list of supported SMART capabilities for extension http://fhir-registry.smarthealthit.org/StructureDefinition/capabilities
+        capabilities: launch-standalone, client-public, client-confidential-symmetric, sso-openid-connect, context-standalone-patient, permission-patient, permission-offline
+    # the manifest output should contain these values (used to allow the API to publish different auth URL than it resolves locally, ie, Docker container)
+    manifest:
+      override: ${MANIFEST_OVERRIDE:false}
+      protocol: http
+      host: ${PUBLISHED_AUTH_HOST:}
+      port: ${PUBLISHED_AUTH_PORT:}
+      context: ~
+      url: ${hspc.platform.manifest.protocol}://${hspc.platform.manifest.host}:${hspc.platform.manifest.port}${hspc.platform.manifest.context}

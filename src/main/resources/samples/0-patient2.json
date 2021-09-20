@@ -45,7 +45,7 @@
       }
     ],
     "resourceType": "Patient",
-    "gender": "OK",
+    "gender": "female",
     "deceasedBoolean": false,
     "contact": [
       {

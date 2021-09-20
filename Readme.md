@@ -1,6 +1,6 @@
 # Amida-Hapi
 
-This is a basic restful Hapi server using Hapi and set up against DSTU2.  
+This is a basic restful Hapi server using Hapi and set up against dstu2.  
 
 ## Build
 
