@@ -26,7 +26,7 @@ public class HapiApplication extends SpringBootServletInitializer {
     private FhirContext dstu2 = FhirContext.forDstu2Hl7Org();
     private IParser jsonParser = dstu2.newJsonParser();
     private FhirValidator validator = dstu2.newValidator();
-    private String serverBase = "http://hapi-fhir:9081/fhir";
+    private String serverBase = "http://hapi-fhir:8080/fhir";
     private IGenericClient client = dstu2.newRestfulGenericClient(serverBase);
 
     public static void main(String[] args) {

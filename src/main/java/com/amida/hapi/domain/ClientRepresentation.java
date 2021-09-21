@@ -1,5 +1,6 @@
-package com.amida.hapi;
+package com.amida.hapi.domain;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -16,13 +17,18 @@ public class ClientRepresentation {
     @JsonProperty
     private String id;
 
+    /*@JsonIgnore
+    private String secretKey;
+    @JsonIgnore
+    private TokenBean token;*/
+
     public ClientRepresentation() {
 
     }
 
     public ClientRepresentation(String name) {
         this.clientId = name;
-        rootUrl = "http://hapi-fhir:8080";
+        rootUrl = "http://localhost:8080";
         redirectUris = new String[1];
         redirectUris[0] = "http://localhost:8080/*";
         webOrigins = new String[1];
@@ -68,4 +74,20 @@ public class ClientRepresentation {
     public void setId(String id) {
         this.id = id;
     }
+
+    /*public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public TokenBean getToken() {
+        return token;
+    }
+
+    public void setToken(TokenBean token) {
+        this.token = token;
+    }*/
 }

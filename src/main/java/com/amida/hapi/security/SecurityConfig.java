@@ -1,5 +1,6 @@
 package com.amida.hapi.security;
 
+import com.amida.hapi.domain.HapiFhirClient;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,9 +38,9 @@ public class SecurityConfig {
     @Value("${oauth.token:http://keycloak:9080/oauth/token}")
     private String tokenUrl;
 
-    private static final Map<String, DefaultOAuth2AccessToken> inMemTokenStore = new HashMap<>();
+    private static final Map<String, HapiFhirClient> inMemTokenStore = new HashMap<>();
 
-    public static Map<String, DefaultOAuth2AccessToken> getInMemTokenStore() {
+    public static Map<String, HapiFhirClient> getInMemTokenStore() {
         return inMemTokenStore;
     }
 

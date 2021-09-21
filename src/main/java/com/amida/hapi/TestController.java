@@ -3,13 +3,13 @@ package com.amida.hapi;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
+import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.IParam;
+import com.amida.hapi.domain.HapiFhirClient;
 import com.amida.hapi.security.HapiAuthInterceptor;
 import com.amida.hapi.security.SecurityConfig;
-import com.amida.hapi.security.TokenBean;
+import com.amida.hapi.domain.TokenBean;
 import io.igia.config.fhir.interceptor.ScopeBasedAuthorizationInterceptor;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.dstu2.model.Patient;
@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -44,7 +44,7 @@ public class TestController {
     public TestController() {
         ctx = FhirContext.forDstu2Hl7Org();
 
-        client = ctx.newRestfulGenericClient("http://hapi-fhir:9081/fhir");
+        client = ctx.newRestfulGenericClient("http://hapi-fhir:8080/fhir");
         //client.registerInterceptor(getAuthenticationInterceptor());
         AdditionalRequestHeadersInterceptor headersInterceptor = new AdditionalRequestHeadersInterceptor();
         headersInterceptor.addHeaderValue("state", SecurityConfig.createState());
@@ -55,40 +55,22 @@ public class TestController {
         keycloakTarget = client.target("http://keycloak:9080");
     }
 
-    private ScopeBasedAuthorizationInterceptor getAuthenticationInterceptor() {
-        return new ScopeBasedAuthorizationInterceptor(new InMemoryTokenStore(), new OAuth2RestTemplate(new AuthorizationCodeResourceDetails()));
-    }
-
-    @GetMapping(value = "/hello")
-    public String helloWorld(@RequestParam String state, @RequestParam String session_state, @RequestParam String code) {
-        return getToken(state, code).getAccessToken();
-    }
-
     @GetMapping(value = "/hello2")
     public String helloWorld2() {
         return "Hello World2 " ;
     }
 
-    @GetMapping(value = "/patient")
-    public String getPatient() {
-        System.out.println("Start rest call");
-        //Patient pt = client.read().resource(Patient.class).withId("Patient/1").execute();
-        Bundle results = client
-                .search()
-                .forResource(Patient.class)
-                .returnBundle(Bundle.class)
-                .execute();
-        System.out.println("End FHIR call");
-        StringBuilder builder = new StringBuilder();
+    //@GetMapping(value = "/patient")
+    private Patient getPatient(String patientId) {
+        String fullPatientId = "Patient/" + patientId;
 
-        for (Bundle.BundleEntryComponent result : results.getEntry()) {
-            builder.append(result.getId()).append(" : ");
-        }
-        return builder.toString();
+        Patient pt = client.read().resource(Patient.class).withId(fullPatientId).execute();
+
+        return pt;
     }
 
     //@GetMapping(value = "/test")
-    public TokenBean getToken(String state, String code) {
+    public TokenBean getToken(String state, String code, HapiFhirClient hapiFhirClient, String patientId) {
         WebTarget resource = keycloakTarget
                 .path("/auth/realms/igia/protocol/openid-connect/token")
                 .queryParam("scope", "openid")
@@ -96,10 +78,12 @@ public class TestController {
 
         Form form = new Form();
         form.param("grant_type", "authorization_code");
-        form.param("client_id", "smart-launch-context-app");
-        form.param("client_secret", "smart-launch-context-app");
+        form.param("client_id", hapiFhirClient.getClientRep().getClientId());
+        form.param("client_secret", hapiFhirClient.getClientSecret());
         form.param("code", code);
-        form.param("redirect_uri", "http://localhost:9081/authorize");
+        form.param("redirect_uri", hapiFhirClient.getClientRep().getRootUrl() +
+                "/authorize/" + hapiFhirClient.getClientRep().getClientId()
+                + "/" + patientId);
 
         String json = resource.request(MediaType.APPLICATION_JSON_TYPE)
                                  .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE), String.class);
@@ -107,19 +91,35 @@ public class TestController {
         return new TokenBean(json);
     }
 
-    @GetMapping(value = "/authorize", produces = MediaType.APPLICATION_JSON)
-    public Object authorize(@RequestParam(required = false) String state,
-                                  @RequestParam(required = false) String sessionState,
-                                  @RequestParam(required = false) String code) {
+    @GetMapping(value = "/authorize/{clientId}/{patientId}", produces = MediaType.APPLICATION_JSON)
+    public Object authorize(@PathVariable String clientId,
+                            @PathVariable String patientId,
+                            @RequestParam(required = false) String state,
+                            @RequestParam(required = false) String session_state,
+                            @RequestParam(required = false) String code) {
         System.out.println("State = " + state);
-        System.out.println("Session State = " + sessionState);
+        System.out.println("Session State = " + session_state);
         System.out.println("Code = " + code);
-        if (state == null) {
-            return new ModelAndView("redirect:" + createURL("http://localhost:9081/authorize"));
+
+        HapiFhirClient hapiFhirClient = SecurityConfig.getInMemTokenStore().get(clientId);
+        TokenBean accessToken = getToken(state, code, hapiFhirClient, patientId);
+        hapiFhirClient.setToken(accessToken);
+
+        //String sofUrl = createSofUrl(state, code, accessToken);
+        return getPatient(patientId);
+    }
+
+    @GetMapping(value = "/start/{clientId}/{patientId}")
+    public Object startApp(@PathVariable String clientId, @PathVariable int patientId, RedirectAttributes redirectAttrs) {
+        HapiFhirClient client = SecurityConfig.getInMemTokenStore().get(clientId);
+        TokenBean token = client.getToken();
+        if (token == null || token.getAccessToken() == null) {
+            redirectAttrs.addFlashAttribute("clientId", clientId).addFlashAttribute("patientId", patientId);
+            return new ModelAndView("redirect:" +
+                    createURL(clientId, client.getClientRep().getRootUrl() +
+                            "/authorize/{clientId}/{patientId}"));
         }
-        TokenBean accessToken = getToken(state, code);
-        String sofUrl = createSofUrl(state, code, accessToken);
-        return accessToken;
+        return new Object();
     }
 
     private Response.ResponseBuilder createResponse(OutboundJaxrsResponse response1) {
@@ -139,14 +139,14 @@ public class TestController {
         String token = createToken(state, code, accessToken);
         String value = "http://localhost:9080/#/patient?token=" +
                         token +
-                        "&aud=http://localhost:9081/fhir" +
+                        "&aud=http://localhost:8080/fhir" +
                         "&access_token=" + accessToken.getAccessToken();
         System.out.println("Full URL = " + value);
         return value;
     }
 
     private String createToken(String state, String code, TokenBean accessToken) {
-        String value = "http://localhost:9081/auth/realms/igia/protocol/smart-openid-connect/smart-launch-context" +
+        String value = "http://localhost:8080/auth/realms/igia/protocol/smart-openid-connect/smart-launch-context" +
                 "?session_code=" + accessToken.getSession_state() +
                 "&client_id=smart-launch-context-app" +
                 "&tab_id=" + state +
@@ -155,9 +155,9 @@ public class TestController {
         return value;
     }
 
-    private String createURL(String redirect_url) {
+    private String createURL(String clientId, String redirect_url) {
         return "http://localhost:9080/auth/realms/igia/protocol/openid-connect/auth" +
-                "?response_type=code&client_id=smart-launch-context-app&state=" + SecurityConfig.createState()
+                "?response_type=code&client_id=" + clientId + "&state=" + SecurityConfig.createState()
                 + "&scope=openid&redirect_uri=" + redirect_url;
     }
 

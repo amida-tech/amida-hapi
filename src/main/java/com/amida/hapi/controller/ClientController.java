@@ -1,6 +1,7 @@
 package com.amida.hapi.controller;
 
-import com.amida.hapi.ClientRepresentation;
+import com.amida.hapi.domain.ClientRepresentation;
+import com.amida.hapi.domain.HapiFhirClient;
 import com.amida.hapi.security.SecurityConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
@@ -35,14 +36,13 @@ public class ClientController {
 
         System.out.println("Status = " + response.getStatus());
         if (response.getStatus() == 201) {
-            saveClient(clientName);
-            return "";
+            return saveClient(clientName);
         }
 
         return response.getStatusInfo().getReasonPhrase();
     }
 
-    private void saveClient(String name) {
+    private String saveClient(String name) {
         String json = viewClient(name);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -50,10 +50,19 @@ public class ClientController {
             List<ClientRepresentation> myObjects = mapper.readValue(json, new TypeReference<List<ClientRepresentation>>(){});
             String uuid = myObjects.get(0).getId();
 
-            String secretKey = getSecretKey(uuid);
+            String secretKey = mapper.readTree(getSecretKey(uuid)).get("value").asText();
+            ClientRepresentation clientRep = myObjects.get(0);
+            HapiFhirClient hapiClient = new HapiFhirClient();
+            hapiClient.setClientRep(clientRep);
+            hapiClient.setClientSecret(secretKey);
+
+            SecurityConfig.getInMemTokenStore().put(name, hapiClient);
             System.out.println("SECRET KEY = " + secretKey);
+
+            return clientRep.getClientId() + " client created ";
         } catch (IOException e) {
             e.printStackTrace();
+            throw new IllegalStateException();
         }
     }
 

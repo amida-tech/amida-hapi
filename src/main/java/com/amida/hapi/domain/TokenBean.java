@@ -1,4 +1,4 @@
-package com.amida.hapi.security;
+package com.amida.hapi.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.codehaus.jackson.JsonNode;
