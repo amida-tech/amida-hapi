@@ -1,12 +1,15 @@
 package com.amida.hapi.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
+import java.util.Date;
 
 public class TokenBean {
+    @JsonProperty("access_token")
     private String accessToken;
     private int expires_in;
     private int refresh_expires_in;
@@ -15,6 +18,10 @@ public class TokenBean {
     private int notBeforePolicy;
     private String session_state;
     private String scope;
+    @JsonIgnore
+    private Date expirationDate;
+    @JsonIgnore
+    private Date refreshExpirationDate;
 
     public TokenBean(String json) {
         try {
@@ -26,12 +33,14 @@ public class TokenBean {
             refresh_token = jsonNode.get("refresh_token").asText();
             session_state = jsonNode.get("session_state").asText();
             scope = jsonNode.get("scope").asText();
+
+            expirationDate = new Date(new Date().getTime() + expires_in);
+            refreshExpirationDate = new Date(new Date().getTime() + refresh_expires_in);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
-    @JsonProperty("access_token")
     public String getAccessToken() {
         return accessToken;
     }
@@ -95,5 +104,13 @@ public class TokenBean {
 
     public void setNotBeforePolicy(int notBeforePolicy) {
         this.notBeforePolicy = notBeforePolicy;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public Date getRefreshExpirationDate() {
+        return refreshExpirationDate;
     }
 }

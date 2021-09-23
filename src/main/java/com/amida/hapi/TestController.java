@@ -1,6 +1,7 @@
 package com.amida.hapi;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.gclient.ICriterion;
@@ -29,6 +30,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 
 @RestController
 public class TestController {
@@ -61,12 +63,13 @@ public class TestController {
     }
 
     //@GetMapping(value = "/patient")
-    private Patient getPatient(String patientId) {
+    private String getPatient(String patientId) {
         String fullPatientId = "Patient/" + patientId;
 
         Patient pt = client.read().resource(Patient.class).withId(fullPatientId).execute();
 
-        return pt;
+        IParser parser = ctx.newJsonParser();
+        return parser.encodeResourceToString(pt);
     }
 
     //@GetMapping(value = "/test")
@@ -106,20 +109,47 @@ public class TestController {
         hapiFhirClient.setToken(accessToken);
 
         //String sofUrl = createSofUrl(state, code, accessToken);
-        return getPatient(patientId);
+        return new ModelAndView("redirect:http://localhost:8080/start/piglet/" + patientId);
     }
 
     @GetMapping(value = "/start/{clientId}/{patientId}")
-    public Object startApp(@PathVariable String clientId, @PathVariable int patientId, RedirectAttributes redirectAttrs) {
-        HapiFhirClient client = SecurityConfig.getInMemTokenStore().get(clientId);
-        TokenBean token = client.getToken();
+    public Object startApp(@PathVariable String clientId, @PathVariable String patientId, RedirectAttributes redirectAttrs) {
+        HapiFhirClient hapiFhirClient = SecurityConfig.getInMemTokenStore().get(clientId);
+        TokenBean token = hapiFhirClient.getToken();
         if (token == null || token.getAccessToken() == null) {
-            redirectAttrs.addFlashAttribute("clientId", clientId).addFlashAttribute("patientId", patientId);
-            return new ModelAndView("redirect:" +
-                    createURL(clientId, client.getClientRep().getRootUrl() +
-                            "/authorize/{clientId}/{patientId}"));
+            return createAccessToken(hapiFhirClient, clientId, patientId, redirectAttrs);
         }
-        return new Object();
+
+        if (new Date().after(token.getExpirationDate()) && new Date().before(token.getRefreshExpirationDate())) {
+            refreshAccessToken(hapiFhirClient);
+        }
+        else if ( new Date().after(token.getExpirationDate()) && new Date().after(token.getRefreshExpirationDate())) {
+            return createAccessToken(hapiFhirClient, clientId, patientId, redirectAttrs);
+        }
+        return getPatient(patientId);
+    }
+
+    private Object createAccessToken(HapiFhirClient hapiFhirClient, String clientId, String patientId, RedirectAttributes redirectAttrs) {
+        redirectAttrs.addFlashAttribute("clientId", clientId).addFlashAttribute("patientId", patientId);
+        return new ModelAndView("redirect:" +
+                createURL(clientId, hapiFhirClient.getClientRep().getRootUrl() +
+                        "/authorize/{clientId}/{patientId}"));
+    }
+
+    private void refreshAccessToken(HapiFhirClient hapiFhirClient) {
+        WebTarget resource = keycloakTarget
+                .path("/auth/realms/igia/protocol/openid-connect/token");
+
+        Form form = new Form();
+        form.param("grant_type", "refresh_token");
+        form.param("client_id", hapiFhirClient.getClientRep().getClientId());
+        form.param("refresh_token", hapiFhirClient.getToken().getRefresh_token());
+
+        String json = resource.request(MediaType.APPLICATION_JSON_TYPE)
+                .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE), String.class);
+
+        System.out.println(json);
+        hapiFhirClient.setToken(new TokenBean(json));
     }
 
     private Response.ResponseBuilder createResponse(OutboundJaxrsResponse response1) {
