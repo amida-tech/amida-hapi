@@ -15,9 +15,11 @@ public class TokenBean {
     private int refresh_expires_in;
     private String refresh_token;
     private String token_type;
+    private String id_token;
     private int notBeforePolicy;
     private String session_state;
     private String scope;
+
     @JsonIgnore
     private Date expirationDate;
     @JsonIgnore
@@ -31,6 +33,8 @@ public class TokenBean {
             expires_in = jsonNode.get("expires_in").asInt();
             refresh_expires_in = jsonNode.get("refresh_expires_in").asInt();
             refresh_token = jsonNode.get("refresh_token").asText();
+            token_type = jsonNode.get("token_type").asText();
+            id_token = jsonNode.get("id_token").asText();
             session_state = jsonNode.get("session_state").asText();
             scope = jsonNode.get("scope").asText();
 
@@ -112,5 +116,13 @@ public class TokenBean {
 
     public Date getRefreshExpirationDate() {
         return refreshExpirationDate;
+    }
+
+    public String getId_token() {
+        return id_token;
+    }
+
+    public void setId_token(String id_token) {
+        this.id_token = id_token;
     }
 }

@@ -71,6 +71,9 @@ dependencies {
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
     implementation("com.fasterxml.jackson.core:jackson-databind:2.12.5")
 
+    // https://mvnrepository.com/artifact/com.auth0/java-jwt
+    implementation("com.auth0:java-jwt:3.18.2")
+
     implementation('org.hibernate:hibernate-core:5.5.5.Final')
     implementation('org.hibernate:hibernate-entitymanager:5.5.5.Final')
     implementation('org.hibernate:hibernate-ehcache:5.5.5.Final')

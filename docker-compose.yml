@@ -22,8 +22,8 @@ services:
   keycloak:
     hostname: keycloak
     container_name: keycloak
-    image: jboss/keycloak:4.5.0.Final
-    command: ["-b", "0.0.0.0", "-Dkeycloak.migration.action=import", "-Dkeycloak.migration.provider=dir", "-Dkeycloak.migration.dir=/opt/jboss/keycloak/realm-config", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING", "-Djboss.socket.binding.port-offset=1000"]
+    image: jboss/keycloak:15.0.2
+    command: ["-b", "0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.migration.action=import", "-Dkeycloak.migration.provider=dir", "-Dkeycloak.migration.dir=/opt/jboss/keycloak/realm-config", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING", "-Djboss.socket.binding.port-offset=1000"]
     volumes:
       - ./realm-config:/opt/jboss/keycloak/realm-config
       - ./providers:/opt/jboss/keycloak/providers
@@ -31,6 +31,7 @@ services:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
       - DB_VENDOR=h2
+      - KEYCLOAK_FRONTEND_URL=http://localhost:9080/auth
     ports:
       - "9080:9080"
       - "9443:9443"

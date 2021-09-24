@@ -26,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -50,8 +51,8 @@ public class TestController {
         //client.registerInterceptor(getAuthenticationInterceptor());
         AdditionalRequestHeadersInterceptor headersInterceptor = new AdditionalRequestHeadersInterceptor();
         headersInterceptor.addHeaderValue("state", SecurityConfig.createState());
-        client.registerInterceptor(headersInterceptor);
-        client.getInterceptorService().registerInterceptor(new HapiAuthInterceptor());
+        //client.registerInterceptor(headersInterceptor);
+        //client.getInterceptorService().registerInterceptor(new HapiAuthInterceptor());
 
         Client client = ClientBuilder.newClient();
         keycloakTarget = client.target("http://keycloak:9080");
@@ -108,25 +109,49 @@ public class TestController {
         TokenBean accessToken = getToken(state, code, hapiFhirClient, patientId);
         hapiFhirClient.setToken(accessToken);
 
+        //System.out.println("Access token = " + accessToken.getAccessToken());
+
         //String sofUrl = createSofUrl(state, code, accessToken);
-        return new ModelAndView("redirect:http://localhost:8080/start/piglet/" + patientId);
+        return new ModelAndView("redirect:http://localhost:8080/start/" + clientId + "/" + patientId);
     }
 
     @GetMapping(value = "/start/{clientId}/{patientId}")
     public Object startApp(@PathVariable String clientId, @PathVariable String patientId, RedirectAttributes redirectAttrs) {
         HapiFhirClient hapiFhirClient = SecurityConfig.getInMemTokenStore().get(clientId);
         TokenBean token = hapiFhirClient.getToken();
+        System.out.println("Client ID = " + clientId);
         if (token == null || token.getAccessToken() == null) {
+            System.out.println("No token");
             return createAccessToken(hapiFhirClient, clientId, patientId, redirectAttrs);
         }
 
-        if (new Date().after(token.getExpirationDate()) && new Date().before(token.getRefreshExpirationDate())) {
+        Date currentDate = new Date();
+        if (currentDate.before(token.getExpirationDate())) {
+            System.out.println("Yes token");
+            verifyAccessToken(hapiFhirClient);
+        }
+        else if (currentDate.after(token.getExpirationDate()) && currentDate.before(token.getRefreshExpirationDate())) {
+            System.out.println("Refresh token token");
             refreshAccessToken(hapiFhirClient);
         }
-        else if ( new Date().after(token.getExpirationDate()) && new Date().after(token.getRefreshExpirationDate())) {
+        else if ( currentDate.after(token.getExpirationDate()) && currentDate.after(token.getRefreshExpirationDate())) {
+            System.out.println("New token");
             return createAccessToken(hapiFhirClient, clientId, patientId, redirectAttrs);
         }
         return getPatient(patientId);
+    }
+
+    private void verifyAccessToken(HapiFhirClient hapiFhirClient) {
+        System.out.println("Verify: " + hapiFhirClient.getToken().getAccessToken());
+        WebTarget resource = keycloakTarget
+                .path("/auth/realms/igia/protocol/openid-connect/userinfo");
+        Invocation.Builder request = resource.request(MediaType.APPLICATION_JSON_TYPE)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + hapiFhirClient.getToken().getAccessToken());
+
+        Response response = request.get();
+        System.out.println(response.getStatus());
+        System.out.println(response.getStatusInfo().getReasonPhrase());
     }
 
     private Object createAccessToken(HapiFhirClient hapiFhirClient, String clientId, String patientId, RedirectAttributes redirectAttrs) {
@@ -190,6 +215,4 @@ public class TestController {
                 "?response_type=code&client_id=" + clientId + "&state=" + SecurityConfig.createState()
                 + "&scope=openid&redirect_uri=" + redirect_url;
     }
-
-
 }

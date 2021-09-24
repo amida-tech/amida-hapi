@@ -28,21 +28,23 @@ public class ClientController {
     public String createClient(@PathVariable String clientName) {
         WebTarget name = keycloakTarget.path("/auth/admin/realms/igia/clients");
 
+        String authToken = getAuthToken();
+
         Invocation.Builder request = name.request();
         request.header("content-type", "application/json");
-        request.header("Authorization", "Bearer " + getAuthToken());
+        request.header("Authorization", "Bearer " + authToken);
 
         Response response = request.post(Entity.entity(new ClientRepresentation(clientName), MediaType.APPLICATION_JSON));
 
         System.out.println("Status = " + response.getStatus());
         if (response.getStatus() == 201) {
-            return saveClient(clientName);
+            return saveClient(clientName, authToken);
         }
 
         return response.getStatusInfo().getReasonPhrase();
     }
 
-    private String saveClient(String name) {
+    private String saveClient(String name, String authToken) {
         String json = viewClient(name);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -50,7 +52,10 @@ public class ClientController {
             List<ClientRepresentation> myObjects = mapper.readValue(json, new TypeReference<List<ClientRepresentation>>(){});
             String uuid = myObjects.get(0).getId();
 
-            String secretKey = mapper.readTree(getSecretKey(uuid)).get("value").asText();
+            String secretKeyJson = getSecretKey(uuid, authToken);
+            System.out.println(secretKeyJson);
+
+            String secretKey = mapper.readTree(secretKeyJson).get("value").asText();
             ClientRepresentation clientRep = myObjects.get(0);
             HapiFhirClient hapiClient = new HapiFhirClient();
             hapiClient.setClientRep(clientRep);
@@ -66,10 +71,14 @@ public class ClientController {
         }
     }
 
-    private String getSecretKey(String uuid) {
+    private String getSecretKey(String uuid, String authToken) {
         Invocation.Builder request = keycloakTarget.path("auth/admin/realms/igia/clients/" + uuid + "/client-secret").request(MediaType.APPLICATION_JSON_TYPE);
         request.header("content-type", "application/json");
-        request.header("Authorization", "Bearer " + getAuthToken());
+        request.header("Authorization", "Bearer " + authToken);
+
+        request = keycloakTarget.path("auth/admin/realms/igia/clients/" + uuid + "/client-secret").request(MediaType.APPLICATION_JSON_TYPE);
+        request.header("content-type", "application/json");
+        request.header("Authorization", "Bearer " + authToken);
 
         return request.get(String.class);
     }
