@@ -31,15 +31,17 @@ public class TokenBean {
             JsonNode jsonNode = objectMapper.readTree(json);
             accessToken = jsonNode.get("access_token").asText();
             expires_in = jsonNode.get("expires_in").asInt();
+            System.out.println("Token expires in " + expires_in);
             refresh_expires_in = jsonNode.get("refresh_expires_in").asInt();
+            System.out.println("Refresh expires in " + refresh_expires_in);
             refresh_token = jsonNode.get("refresh_token").asText();
             token_type = jsonNode.get("token_type").asText();
             id_token = jsonNode.get("id_token").asText();
             session_state = jsonNode.get("session_state").asText();
             scope = jsonNode.get("scope").asText();
 
-            expirationDate = new Date(new Date().getTime() + expires_in);
-            refreshExpirationDate = new Date(new Date().getTime() + refresh_expires_in);
+            expirationDate = new Date(new Date().getTime() + (expires_in * 1000L));
+            refreshExpirationDate = new Date(new Date().getTime() + (refresh_expires_in * 1000L));
         } catch (IOException ex) {
             ex.printStackTrace();
         }

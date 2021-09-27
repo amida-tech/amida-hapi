@@ -32,7 +32,7 @@ import java.util.*;
 public class SecurityConfig {
 
     @Value("${oauth.resource:http://keycloak:9080}")
-    private String baseUrl;
+    private static final String keycloakBaseUrl = "http://keycloak:9080";
     @Value("${oauth.authorize:http://keycloak:9080/oauth/authorize}")
     private String authorizeUrl;
     @Value("${oauth.token:http://keycloak:9080/oauth/token}")
@@ -96,6 +96,10 @@ public class SecurityConfig {
             index = length - 1;
         }
         return index;
+    }
+
+    public static String getKeycloakBaseUrl() {
+        return keycloakBaseUrl;
     }
 
     public static DefaultOAuth2AccessToken createToken(String json) {
