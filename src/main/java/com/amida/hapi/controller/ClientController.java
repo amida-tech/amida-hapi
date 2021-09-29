@@ -4,13 +4,18 @@ import com.amida.hapi.domain.ClientRepresentation;
 import com.amida.hapi.domain.CredentialRepresentation;
 import com.amida.hapi.domain.HapiFhirClient;
 import com.amida.hapi.security.SecurityConfig;
+import com.amida.hapi.security.TokenUtil;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.ws.rs.client.*;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -21,24 +26,29 @@ import java.util.List;
 public class ClientController {
     private final WebTarget keycloakTarget;
 
-    public ClientController() {
+    @Autowired
+    TokenUtil tokenUtil;
+
+    private final ObjectMapper objectMapper;
+
+    public ClientController(@Value("${saraswati.keycloak.internal}") String keycloakBaseUrl) {
         Client client = ClientBuilder.newClient();
-        keycloakTarget = client.target(SecurityConfig.getKeycloakBaseUrl());
+        keycloakTarget = client.target(keycloakBaseUrl);
+        objectMapper = new ObjectMapper();
     }
 
     @GetMapping(value = "registerClient/{clientName}")
     public String createClient(@PathVariable String clientName) {
-        WebTarget name = keycloakTarget.path("/auth/admin/realms/igia/clients");
+        WebTarget createClient = keycloakTarget.path("/auth/admin/realms/igia/clients");
 
         String authToken = getAuthToken();
 
-        Invocation.Builder request = name.request();
+        Invocation.Builder request = createClient.request();
         request.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         request.header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken);
 
         Response response = request.post(Entity.entity(new ClientRepresentation(clientName), MediaType.APPLICATION_JSON));
 
-        System.out.println("Status = " + response.getStatus());
         if (response.getStatus() == 201) {
             return saveClient(clientName, authToken);
         }
@@ -91,6 +101,24 @@ public class ClientController {
     }
 
     private String getAuthToken() {
-        return SecurityConfig.getAuthToken(keycloakTarget);
+        Invocation.Builder request = keycloakTarget.path("/auth/realms/master/protocol/openid-connect/token").request(MediaType.APPLICATION_JSON_TYPE);
+        Form form = new Form();
+        form.param("client_id", "admin-cli");
+        form.param("grant_type", "password");
+        form.param("username", "admin");
+        form.param("password", "admin");
+
+        String json = request
+                .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE), String.class);
+
+        String accessToken;
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            accessToken = jsonNode.get("access_token").asText();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "error";
+        }
+        return accessToken;
     }
 }

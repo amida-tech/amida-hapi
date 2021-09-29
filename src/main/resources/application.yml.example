@@ -1,6 +1,18 @@
 server:
   port: 8080
 
+saraswati:
+  enableAuth: false
+  url:
+    internal: http://hapi-fhir:${server.port}
+    external: http://localhost:${server.port}
+  keycloak:
+    port: 9080
+    internal: http://keycloak:${saraswati.keycloak.port}
+    external: http://localhost:${saraswati.keycloak.port}
+
+
+# **************** Smart on Fhir config ************
 spring:
   application:
     name: amida-hapi
@@ -17,10 +29,10 @@ spring:
       hibernate.search.default.indexBase: target/lucenefiles
       hibernate.search.lucene_version: LUCENE_55
       hibernate.search.model_mapping: ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory
-
   h2:
     console:
       enabled: true
+
 hapi:
   fhir:
     version: dstu2
@@ -69,7 +81,7 @@ hspc:
       context: ~
       url: ${hspc.platform.authorization.protocol}://${hspc.platform.authorization.host}:${hspc.platform.authorization.port}${hspc.platform.authorization.context}
       authorizeUrlPath: /auth/realms/igia/protocol/openid-connect/auth
-      tokenUrlPath: /auth/realms/igia/protocol/smart-openid-connect/token
+      tokenUrlPath: /auth/realms/igia/protocol/openid-connect/token
       tokenCheckUrlPath: /auth/realms/igia/protocol/openid-connect/token/introspect
       userinfoUrlPath: /auth/realms/igia/protocol/openid-connect/userinfo
       smart:

@@ -10,6 +10,7 @@ import com.amida.hapi.domain.TokenBean;
 import com.amida.hapi.security.SecurityConfig;
 import com.amida.hapi.security.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,20 +29,35 @@ import javax.ws.rs.core.MediaType;
 public class LaunchController {
 
     @Autowired
-    RestfulServer restfulServer;
+    TokenUtil tokenUtil;
+
+    @Value("${saraswati.keycloak.external}")
+    private String keycloakExternalUrl;
+
+    @Value("${saraswati.url.external}")
+    private String hapiExternalUrl;
+
+    @Value("${saraswati.url.internal}")
+    private String hapiInternalUrl;
+
+    @Value("${hspc.platform.authorization.authorizeUrlPath}")
+    private String authUrl;
+
+    @Value("${hspc.platform.authorization.tokenUrlPath}")
+    private String tokenUrl;
 
     private final WebTarget keycloakTarget;
 
-    public LaunchController() {
+    public LaunchController(@Value("${saraswati.keycloak.internal}") String keycloakBaseUrl) {
         Client client = ClientBuilder.newClient();
-        keycloakTarget = client.target(SecurityConfig.getKeycloakBaseUrl());
+        keycloakTarget = client.target(keycloakBaseUrl);
     }
 
     private String getPatient(String clientId, String patientId) {
         String fullPatientId = "Patient/" + patientId;
 
-        FhirContext ctx = SecurityConfig.getClient();
-        IGenericClient client = ctx.newRestfulGenericClient("http://hapi-fhir:8080/fhir");
+        FhirContext ctx = SecurityConfig.getFhirContext();
+        IGenericClient client = ctx.newRestfulGenericClient(hapiInternalUrl + "/fhir");
         Patient pt = client.read()
                 .resource(Patient.class)
                 .withId(fullPatientId)
@@ -54,7 +70,7 @@ public class LaunchController {
 
     private TokenBean getToken(String code, HapiFhirClient hapiFhirClient, String patientId) {
         WebTarget resource = keycloakTarget
-                .path("/auth/realms/igia/protocol/openid-connect/token")
+                .path(tokenUrl)
                 .queryParam("scope", "openid");
 
         Form form = new Form();
@@ -84,7 +100,7 @@ public class LaunchController {
 
         hapiFhirClient.setToken(accessToken);
 
-        return new ModelAndView("redirect:http://localhost:8080/start/" + clientId + "/" + patientId);
+        return new ModelAndView("redirect:" + hapiExternalUrl + "/start/" + clientId + "/" + patientId);
     }
 
     @GetMapping(value = "/start/{clientId}/{patientId}")
@@ -111,7 +127,7 @@ public class LaunchController {
     }
 
     private boolean verifyAccessToken(HapiFhirClient hapiFhirClient) {
-        return TokenUtil.verifyToken(keycloakTarget, hapiFhirClient);
+        return tokenUtil.verifyToken(keycloakTarget, hapiFhirClient);
     }
 
     private Object createAccessToken(HapiFhirClient hapiFhirClient, String clientId, String patientId, RedirectAttributes redirectAttrs) {
@@ -122,8 +138,7 @@ public class LaunchController {
     }
 
     private String refreshAccessToken(HapiFhirClient hapiFhirClient) {
-        WebTarget resource = keycloakTarget
-                .path("/auth/realms/igia/protocol/openid-connect/token");
+        WebTarget resource = keycloakTarget.path(tokenUrl);
 
         Form form = new Form();
         form.param("grant_type", "refresh_token");
@@ -140,7 +155,7 @@ public class LaunchController {
     }
 
     private String createURL(String clientId, String redirect_url) {
-        return "http://localhost:9080/auth/realms/igia/protocol/openid-connect/auth" +
+        return keycloakExternalUrl + authUrl +
                 "?response_type=code&client_id=" + clientId + "&state=" + SecurityConfig.createState()
                 + "&scope=openid&redirect_uri=" + redirect_url;
     }

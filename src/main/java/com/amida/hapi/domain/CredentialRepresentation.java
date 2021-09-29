@@ -8,7 +8,6 @@ public class CredentialRepresentation {
     private String secretData;
     private boolean temporary;
     private String type;
-
     private String userLabel;
     private String value;
 

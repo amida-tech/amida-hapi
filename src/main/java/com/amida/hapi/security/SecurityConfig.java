@@ -1,8 +1,6 @@
 package com.amida.hapi.security;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import com.amida.hapi.domain.HapiFhirClient;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -13,14 +11,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
-import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
-import org.springframework.security.oauth2.common.DefaultOAuth2RefreshToken;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
@@ -34,14 +29,13 @@ import java.util.*;
 @ComponentScan(basePackageClasses = SecurityConfig.class)
 public class SecurityConfig {
 
-    @Value("${oauth.resource:http://keycloak:9080}")
-    private static final String keycloakBaseUrl = "http://keycloak:9080";
-    @Value("${oauth.authorize:http://keycloak:9080/oauth/authorize}")
-    private String authorizeUrl;
-    @Value("${oauth.token:http://keycloak:9080/oauth/token}")
-    private String tokenUrl;
+    @Value("${saraswati.keycloak.internal}")
+    private String keycloakInternalUrl;
 
-    private static FhirContext client;
+    @Value("${hspc.platform.authorization.tokenUrlPath}")
+    private String tokenPath;
+
+    private static FhirContext fhirContext;
 
     private static final Map<String, HapiFhirClient> inMemTokenStore = new HashMap<>();
 
@@ -51,12 +45,12 @@ public class SecurityConfig {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static FhirContext getClient() {
-        return client;
+    public static FhirContext getFhirContext() {
+        return fhirContext;
     }
 
-    public static void setClient(FhirContext client) {
-        SecurityConfig.client = client;
+    public static void setFhirContext(FhirContext client) {
+        SecurityConfig.fhirContext = client;
     }
 
     @Bean
@@ -67,7 +61,7 @@ public class SecurityConfig {
         List scopes = new ArrayList<String>(2);
         scopes.add("write");
         scopes.add("read");
-        resource.setAccessTokenUri(tokenUrl);
+        resource.setAccessTokenUri(keycloakInternalUrl + tokenPath);
         resource.setClientId("restapp");
         resource.setClientSecret("restapp");
         resource.setGrantType("password");
@@ -78,7 +72,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public OAuth2RestOperations restTemplate() {
+    public OAuth2RestTemplate restTemplate() {
         AccessTokenRequest atr = new DefaultAccessTokenRequest();
         return new OAuth2RestTemplate(resource(), new DefaultOAuth2ClientContext(atr));
     }
@@ -109,33 +103,6 @@ public class SecurityConfig {
             index = length - 1;
         }
         return index;
-    }
-
-    public static String getKeycloakBaseUrl() {
-        return keycloakBaseUrl;
-    }
-
-    public static DefaultOAuth2AccessToken createToken(String json) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(json);
-            String accessToken = jsonNode.get("access_token").asText();
-            int expires_in = jsonNode.get("expires_in").asInt();
-            int refresh_expires_in = jsonNode.get("refresh_expires_in").asInt();
-            String refresh_token = jsonNode.get("refresh_token").asText();
-            String session_state = jsonNode.get("session_state").asText();
-            HashSet<String> scope = new HashSet<>(Arrays.asList(jsonNode.get("scope").asText().split(" ")));
-
-            DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(accessToken);
-            token.setTokenType(token.OAUTH2_TYPE);
-            token.setRefreshToken(new DefaultOAuth2RefreshToken(refresh_token));
-            token.setScope(scope);
-            token.setExpiration(new Date(new Date().getTime() + expires_in));
-            return token;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        return null;
     }
 
     public static String getAuthToken(WebTarget keycloakTarget) {

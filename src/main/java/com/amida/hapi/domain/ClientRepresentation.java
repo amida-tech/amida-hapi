@@ -1,6 +1,5 @@
 package com.amida.hapi.domain;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -17,13 +16,8 @@ public class ClientRepresentation {
     @JsonProperty
     private String id;
 
-    /*@JsonIgnore
-    private String secretKey;
-    @JsonIgnore
-    private TokenBean token;*/
-
     public ClientRepresentation() {
-
+        //required for jackson
     }
 
     public ClientRepresentation(String name) {
@@ -74,20 +68,4 @@ public class ClientRepresentation {
     public void setId(String id) {
         this.id = id;
     }
-
-    /*public String getSecretKey() {
-        return secretKey;
-    }
-
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
-    }
-
-    public TokenBean getToken() {
-        return token;
-    }
-
-    public void setToken(TokenBean token) {
-        this.token = token;
-    }*/
 }
