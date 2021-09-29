@@ -39,7 +39,7 @@ hapi:
       subscription-enabled: false
     server:
       path: /fhir/*
-      url: http://localhost:8087/fhir/
+      url: http://localhost:8080/fhir/
 management:
   security:
     enabled: false

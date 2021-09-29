@@ -4,10 +4,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import com.amida.hapi.security.HapiAuthInterceptor;
+import com.amida.hapi.security.SecurityConfig;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,11 +27,13 @@ import java.util.HashMap;
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class HapiApplication extends SpringBootServletInitializer {
 
-    private FhirContext dstu2 = FhirContext.forDstu2Hl7Org();
-    private IParser jsonParser = dstu2.newJsonParser();
-    private FhirValidator validator = dstu2.newValidator();
+    @Autowired
+    RestfulServer restfulServer;
+
+    private IParser jsonParser;
+    private FhirValidator validator;
     private String serverBase = "http://hapi-fhir:8080/fhir";
-    private IGenericClient client = dstu2.newRestfulGenericClient(serverBase);
+    private IGenericClient client;
 
     public static void main(String[] args) {
 
@@ -36,6 +42,15 @@ public class HapiApplication extends SpringBootServletInitializer {
 
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
+        restfulServer.getInterceptorService().registerInterceptor(new HapiAuthInterceptor());
+
+        FhirContext dstu2 = restfulServer.getFhirContext();
+        jsonParser = dstu2.newJsonParser();
+        validator = dstu2.newValidator();
+        client = dstu2.newRestfulGenericClient(serverBase);
+
+        SecurityConfig.setClient(dstu2);
+
         return args -> {
 //            FileResource fs =
             File dir = new File("/var/hapi/init");
@@ -69,7 +84,7 @@ public class HapiApplication extends SpringBootServletInitializer {
                     ValidationResult validation = validator.validateWithResult(resource);
 
                     if (validation.isSuccessful()) {
-                        executeResource(resource, idMap);
+                        createResource(resource, idMap);
                     } else {
                         System.out.println(validation.getMessages());
                     }
@@ -82,11 +97,12 @@ public class HapiApplication extends SpringBootServletInitializer {
         }
     }
 
-    private void executeResource(IBaseResource resource, HashMap<String, String> idMap) {
+    private void createResource(IBaseResource resource, HashMap<String, String> idMap) {
         String origId = resource.getIdElement().toString();
         System.out.println(">>" + origId);
         MethodOutcome outcome = client.create()
                 .resource(resource)
+                .withAdditionalHeader("client_id", "startup")
                 .execute();
         System.out.println(outcome.getCreated());
         String id = outcome.getId().toUnqualifiedVersionless().toString();

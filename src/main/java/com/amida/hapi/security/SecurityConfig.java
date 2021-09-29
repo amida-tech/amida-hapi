@@ -1,5 +1,8 @@
 package com.amida.hapi.security;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import com.amida.hapi.domain.HapiFhirClient;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -38,6 +41,8 @@ public class SecurityConfig {
     @Value("${oauth.token:http://keycloak:9080/oauth/token}")
     private String tokenUrl;
 
+    private static FhirContext client;
+
     private static final Map<String, HapiFhirClient> inMemTokenStore = new HashMap<>();
 
     public static Map<String, HapiFhirClient> getInMemTokenStore() {
@@ -45,6 +50,14 @@ public class SecurityConfig {
     }
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    public static FhirContext getClient() {
+        return client;
+    }
+
+    public static void setClient(FhirContext client) {
+        SecurityConfig.client = client;
+    }
 
     @Bean
     protected OAuth2ProtectedResourceDetails resource() {

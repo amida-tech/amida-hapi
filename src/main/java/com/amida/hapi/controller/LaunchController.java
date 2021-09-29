@@ -1,14 +1,16 @@
 package com.amida.hapi.controller;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import com.amida.hapi.domain.HapiFhirClient;
 import com.amida.hapi.domain.TokenBean;
 import com.amida.hapi.security.SecurityConfig;
-import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
-import org.hl7.fhir.dstu2.model.Patient;
+import com.amida.hapi.security.TokenUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,40 +21,34 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.Form;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 @RestController
+@Component
 public class LaunchController {
 
-    private final FhirContext ctx;
-    private final IGenericClient client;
+    @Autowired
+    RestfulServer restfulServer;
 
     private final WebTarget keycloakTarget;
 
-    private String redirect_url = "http://localhost:9080/auth/realms/igia/protocol/openid-connect/auth" +
-            "?response_type=code&client_id=igia-fhir-api-example&state=12345&scope=openid&redirect_uri=http://localhost:8080/hello";
-
     public LaunchController() {
-        ctx = FhirContext.forDstu2Hl7Org();
-
-        client = ctx.newRestfulGenericClient("http://hapi-fhir:8080/fhir");
-
         Client client = ClientBuilder.newClient();
         keycloakTarget = client.target(SecurityConfig.getKeycloakBaseUrl());
     }
 
-    private String getPatient(String patientId) {
+    private String getPatient(String clientId, String patientId) {
         String fullPatientId = "Patient/" + patientId;
 
-        Patient pt = client.read().resource(Patient.class).withId(fullPatientId).execute();
+        FhirContext ctx = SecurityConfig.getClient();
+        IGenericClient client = ctx.newRestfulGenericClient("http://hapi-fhir:8080/fhir");
+        Patient pt = client.read()
+                .resource(Patient.class)
+                .withId(fullPatientId)
+                .withAdditionalHeader("client_id", clientId)
+                .execute();
 
-        IParser parser = ctx.newJsonParser();
+        IParser parser = ctx.newJsonParser().setPrettyPrint(true);
         return parser.encodeResourceToString(pt);
     }
 
@@ -111,21 +107,11 @@ public class LaunchController {
                 hapiFhirClient.setToken(new TokenBean(json));
             }
         }
-        return getPatient(patientId);
+        return getPatient(clientId, patientId);
     }
 
     private boolean verifyAccessToken(HapiFhirClient hapiFhirClient) {
-        WebTarget resource = keycloakTarget
-                .path("/auth/realms/igia/protocol/openid-connect/userinfo");
-        Invocation.Builder request = resource.request(MediaType.APPLICATION_JSON_TYPE)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + hapiFhirClient.getToken().getAccessToken());
-
-        Response response = request.get();
-        System.out.println(response.getStatus());
-        System.out.println(response.getStatusInfo().getReasonPhrase());
-
-        return response.getStatus() == 200;
+        return TokenUtil.verifyToken(keycloakTarget, hapiFhirClient);
     }
 
     private Object createAccessToken(HapiFhirClient hapiFhirClient, String clientId, String patientId, RedirectAttributes redirectAttrs) {
