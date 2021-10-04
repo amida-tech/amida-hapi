@@ -128,7 +128,7 @@ public class HapiApplication extends SpringBootServletInitializer {
         System.out.println(">>" + origId);
         MethodOutcome outcome = client.create()
                 .resource(resource)
-                .withAdditionalHeader("client_id", "startup")
+                .withAdditionalHeader("type", "startup")
                 .execute();
         System.out.println(outcome.getCreated());
         String id = outcome.getId().toUnqualifiedVersionless().toString();

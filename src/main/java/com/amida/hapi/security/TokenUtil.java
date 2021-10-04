@@ -17,16 +17,20 @@ public class TokenUtil {
     @Value("${hspc.platform.authorization.userinfoUrlPath}")
     private String userInfoPath;
 
-    public boolean verifyToken(HapiFhirClient hapiFhirClient, String keycloakBaseUrl) {
+    public boolean verifyToken(String keycloakBaseUrl, String accessToken) {
         WebTarget keycloakTarget = ClientBuilder.newClient().target(keycloakBaseUrl);
-        return verifyToken(keycloakTarget, hapiFhirClient);
+        return verifyToken(keycloakTarget, accessToken);
     }
 
     public boolean verifyToken(WebTarget keycloakTarget, HapiFhirClient hapiFhirClient) {
+        return verifyToken(keycloakTarget, hapiFhirClient.getToken().getAccessToken());
+    }
+
+    public boolean verifyToken(WebTarget keycloakTarget, String accessToken) {
         WebTarget resource = keycloakTarget.path(userInfoPath);
         Invocation.Builder request = resource.request(MediaType.APPLICATION_JSON_TYPE)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + hapiFhirClient.getToken().getAccessToken());
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 
         Response response = request.get();
 

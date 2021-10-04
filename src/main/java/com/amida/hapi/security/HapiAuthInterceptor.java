@@ -3,10 +3,10 @@ package com.amida.hapi.security;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.amida.hapi.domain.HapiFhirClient;
 import io.igia.config.fhir.interceptor.ScopeBasedAuthorizationInterceptor;
-import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 @Primary
 @Component
@@ -39,21 +41,17 @@ public class HapiAuthInterceptor extends ScopeBasedAuthorizationInterceptor {
             return true;
         }
 
-        String client_id = theRequestDetails.getHeader("client_id");
-        if (client_id == null || "".equals(client_id)) {
-            throw new AuthenticationException("Bypassed client selection.");
-        }
-
-        if ("startup".equals(client_id)) {
+        if (theRequestDetails.getHeader("type") != null && theRequestDetails.getHeader("type").equals("startup")) {
             return true;
         }
 
-        HapiFhirClient hapiFhirClient = SecurityConfig.getInMemTokenStore().get(client_id);
-        if (hapiFhirClient == null) {
-            throw new AuthenticationException("Client has not authenticated yet.");
+        if (theRequestDetails.getHeader(AUTHORIZATION) == null
+                || !theRequestDetails.getHeader(AUTHORIZATION).startsWith("Bearer ")) {
+            throw new AuthenticationException("Unauthorized: Missing Authorization or invalid header value.");
         }
 
-        if (tokenUtil.verifyToken(hapiFhirClient, keycloakBaseUrl)) {
+        String authHeader = theRequestDetails.getHeader(AUTHORIZATION).split(" ")[1];
+        if (tokenUtil.verifyToken(keycloakBaseUrl, authHeader)) {
             return true;
         }
         else {

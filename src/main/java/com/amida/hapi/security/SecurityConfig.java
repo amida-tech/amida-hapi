@@ -35,6 +35,12 @@ public class SecurityConfig {
     @Value("${hspc.platform.authorization.tokenUrlPath}")
     private String tokenPath;
 
+    @Value("${saraswati.keycloak.user.username}")
+    private String username;
+
+    @Value("${saraswati.keycloak.user.password}")
+    private String password;
+
     private static FhirContext fhirContext;
 
     private static final Map<String, HapiFhirClient> inMemTokenStore = new HashMap<>();
@@ -58,7 +64,7 @@ public class SecurityConfig {
         ResourceOwnerPasswordResourceDetails resource;
         resource = new ResourceOwnerPasswordResourceDetails();
 
-        List scopes = new ArrayList<String>(2);
+        List<String> scopes = new ArrayList<>(2);
         scopes.add("write");
         scopes.add("read");
         resource.setAccessTokenUri(keycloakInternalUrl + tokenPath);
@@ -66,8 +72,8 @@ public class SecurityConfig {
         resource.setClientSecret("restapp");
         resource.setGrantType("password");
         resource.setScope(scopes);
-        resource.setUsername("**USERNAME**");
-        resource.setPassword("**PASSWORD**");
+        resource.setUsername(username);
+        resource.setPassword(password);
         return resource;
     }
 

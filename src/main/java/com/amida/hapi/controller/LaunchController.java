@@ -53,7 +53,7 @@ public class LaunchController {
         keycloakTarget = client.target(keycloakBaseUrl);
     }
 
-    private String getPatient(String clientId, String patientId) {
+    private String getPatient(String accessToken, String patientId) {
         String fullPatientId = "Patient/" + patientId;
 
         FhirContext ctx = SecurityConfig.getFhirContext();
@@ -61,7 +61,7 @@ public class LaunchController {
         Patient pt = client.read()
                 .resource(Patient.class)
                 .withId(fullPatientId)
-                .withAdditionalHeader("client_id", clientId)
+                .withAdditionalHeader("Authorization", "Bearer " + accessToken)
                 .execute();
 
         IParser parser = ctx.newJsonParser().setPrettyPrint(true);
@@ -123,7 +123,7 @@ public class LaunchController {
                 hapiFhirClient.setToken(new TokenBean(json));
             }
         }
-        return getPatient(clientId, patientId);
+        return getPatient(hapiFhirClient.getToken().getAccessToken(), patientId);
     }
 
     private boolean verifyAccessToken(HapiFhirClient hapiFhirClient) {

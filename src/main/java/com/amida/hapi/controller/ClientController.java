@@ -29,6 +29,12 @@ public class ClientController {
     @Autowired
     TokenUtil tokenUtil;
 
+    @Value("${saraswati.keycloak.user.username}")
+    private String username;
+
+    @Value("${saraswati.keycloak.user.password}")
+    private String password;
+
     private final ObjectMapper objectMapper;
 
     public ClientController(@Value("${saraswati.keycloak.internal}") String keycloakBaseUrl) {
@@ -105,8 +111,8 @@ public class ClientController {
         Form form = new Form();
         form.param("client_id", "admin-cli");
         form.param("grant_type", "password");
-        form.param("username", "admin");
-        form.param("password", "admin");
+        form.param("username", username);
+        form.param("password", password);
 
         String json = request
                 .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE), String.class);
