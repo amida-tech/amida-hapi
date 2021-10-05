@@ -10,6 +10,9 @@ saraswati:
     port: 9080
     internal: http://keycloak:${saraswati.keycloak.port}
     external: http://localhost:${saraswati.keycloak.port}
+    user:
+      username: admin
+      password: admin
 
 
 # **************** Smart on Fhir config ************
