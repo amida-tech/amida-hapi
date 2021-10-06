@@ -1,0 +1,38 @@
+#
+# This Source Code Form is subject to the terms of the Mozilla Public License, v.
+# 2.0 with a Healthcare Disclaimer.
+# A copy of the Mozilla Public License, v. 2.0 with the Healthcare Disclaimer can
+# be found under the top level directory, named LICENSE.
+# If a copy of the MPL was not distributed with this file, You can obtain one at
+# http://mozilla.org/MPL/2.0/.
+# If a copy of the Healthcare Disclaimer was not distributed with this file, You
+# can obtain one at the project website https://github.com/igia.
+#
+# Copyright (C) 2018-2019 Persistent Systems, Inc.
+#
+
+version: '2'
+services:
+  api:
+    hostname: hapi-fhir
+    container_name: hapi-fhir
+    build: .
+    ports:
+      - "8080:8080"
+  keycloak:
+    hostname: keycloak
+    container_name: keycloak
+    image: jboss/keycloak:15.0.2
+    command: ["-b", "0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.migration.action=import", "-Dkeycloak.migration.provider=dir", "-Dkeycloak.migration.dir=/opt/jboss/keycloak/realm-config", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING", "-Djboss.socket.binding.port-offset=1000"]
+    volumes:
+      - ./realm-config:/opt/jboss/keycloak/realm-config
+      - ./providers:/opt/jboss/keycloak/providers
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=h2
+      - KEYCLOAK_FRONTEND_URL=http://localhost:9080/auth
+    ports:
+      - "9080:9080"
+      - "9443:9443"
+      - "10990:10990"

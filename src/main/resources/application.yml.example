@@ -1,0 +1,104 @@
+server:
+  port: 8080
+
+saraswati:
+  enableAuth: false
+  url:
+    internal: http://hapi-fhir:${server.port}
+    external: http://localhost:${server.port}
+  keycloak:
+    port: 9080
+    internal: http://keycloak:${saraswati.keycloak.port}
+    external: http://localhost:${saraswati.keycloak.port}
+    user:
+      username: admin
+      password: admin
+
+
+# **************** Smart on Fhir config ************
+spring:
+  application:
+    name: amida-hapi
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate.jdbc.batch_size: 20
+      hibernate.cache.use_query_cache: false
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_structured_entries: false
+      hibernate.cache.use_minimal_puts: false
+      hibernate.search.default.directory_provider: filesystem
+      hibernate.search.default.indexBase: target/lucenefiles
+      hibernate.search.lucene_version: LUCENE_55
+      hibernate.search.model_mapping: ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory
+  h2:
+    console:
+      enabled: true
+
+hapi:
+  fhir:
+    version: dstu2
+    rest:
+      server-name: hapi-fhir-spring-boot-sample-server-jpa
+      server-version: 1.0.0
+      implementation-description: Spring Boot Jpa Server Sample
+      default-response-encoding: json
+      e-tag-support: enabled
+      default-pretty-print: true
+    validation:
+      enabled: true
+      request-only: true
+    jpa:
+      scheduling-disabled: true
+      subscription-enabled: false
+    server:
+      path: /fhir/*
+      url: http://localhost:8080/fhir/
+management:
+  security:
+    enabled: false
+
+security:
+  oauth2:
+    resource:
+      jwk:
+        key-set-uri: http://keycloak:9080/auth/realms/igia/protocol/openid-connect/certs # required for scope enforcement
+      jwt:
+        key-uri: http://keycloak:9080/auth/realms/igia
+
+hspc:
+  platform:
+    api:
+      security:
+        # determines if security is applied at the contextPath, options are secured, mock or open
+        mode: secured
+      oauth2: # these values are placeholders required by HSPC library
+        clientId:
+        clientSecret:
+        scopes:
+    authorization:
+      protocol: http #https
+      host: ${AUTH_HOST:hapi-fhir}
+      port: ${AUTH_PORT:8080}
+      context: ~
+      url: ${hspc.platform.authorization.protocol}://${hspc.platform.authorization.host}:${hspc.platform.authorization.port}${hspc.platform.authorization.context}
+      authorizeUrlPath: /auth/realms/igia/protocol/openid-connect/auth
+      tokenUrlPath: /auth/realms/igia/protocol/openid-connect/token
+      tokenCheckUrlPath: /auth/realms/igia/protocol/openid-connect/token/introspect
+      userinfoUrlPath: /auth/realms/igia/protocol/openid-connect/userinfo
+      smart:
+        launchUrlPath: #placeholder required by library but not implemented in auth server
+        registrationEndpointUrlPath: /auth/realms/igia/clients-registrations/openid-connect
+        urisEndpointExtensionUrl: http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris
+        launchRegistrationUrl: #placeholder required by library but not implemented in auth server
+        # comma separate list of supported SMART capabilities for extension http://fhir-registry.smarthealthit.org/StructureDefinition/capabilities
+        capabilities: launch-standalone, client-public, client-confidential-symmetric, sso-openid-connect, context-standalone-patient, permission-patient, permission-offline
+    # the manifest output should contain these values (used to allow the API to publish different auth URL than it resolves locally, ie, Docker container)
+    manifest:
+      override: ${MANIFEST_OVERRIDE:false}
+      protocol: http
+      host: ${PUBLISHED_AUTH_HOST:}
+      port: ${PUBLISHED_AUTH_PORT:}
+      context: ~
+      url: ${hspc.platform.manifest.protocol}://${hspc.platform.manifest.host}:${hspc.platform.manifest.port}${hspc.platform.manifest.context}

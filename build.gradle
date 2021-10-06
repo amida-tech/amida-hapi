@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.5.6.RELEASE'
+        springBootVersion = '2.2.0.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -25,43 +25,72 @@ repositories {
 
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-actuator')
-    compile('org.springframework.boot:spring-boot-starter-data-jpa')
-    compile('org.springframework.boot:spring-boot-starter-web')
-    compile('org.springframework.boot:spring-boot-starter-jersey')
-    compile('org.springframework.boot:spring-boot-configuration-processor')
+    // https://mvnrepository.com/artifact/org.springframework/spring-core
+    implementation 'org.springframework:spring-core:5.2.0.RELEASE'
+    // https://mvnrepository.com/artifact/org.springframework/spring-context
+    implementation('org.springframework:spring-context:5.2.0.RELEASE')
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies
+    implementation('org.springframework.boot:spring-boot-dependencies:2.2.0.RELEASE')
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot
+    implementation('org.springframework.boot:spring-boot:2.2.0.RELEASE')
+    implementation('org.springframework.boot:spring-boot-starter-web:2.2.0.RELEASE')
+    implementation('org.springframework.boot:spring-boot-starter-jersey:2.4.4')
+    implementation('org.springframework.security:spring-security-config:5.2.0.RELEASE')
 
+    // https://mvnrepository.com/artifact/org.springframework.security.oauth/spring-security-oauth2
+    implementation('org.springframework.boot:spring-boot-starter-oauth2-resource-server:2.2.0.RELEASE')
+    // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'
+
+    // https://mvnrepository.com/artifact/io.igia/igia-fhir-auto-configure
+    implementation 'io.igia:igia-fhir-auto-configure:0.3.3'
+
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-base:4.1.0')
     // https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-spring-boot-starter
-    compile('ca.uhn.hapi.fhir:hapi-fhir-spring-boot-starter:3.4.0')
-    compile('ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:3.4.0')
-    compile('ca.uhn.hapi.fhir:hapi-fhir-jaxrsserver-base:3.4.0')
-    compile('ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:3.4.0')
-    compile('ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu3:3.4.0')
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-spring-boot-starter:4.1.0')
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:4.1.0')
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-jaxrsserver-base:4.1.0')
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:4.1.0')
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2:4.1.0')
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:4.1.0')
 
+    // https://mvnrepository.com/artifact/javax.inject/javax.inject
+    implementation('javax.inject:javax.inject:1')
+    implementation('javax.ws.rs:javax.ws.rs-api:2.0.1')
 
-    compile('org.hibernate:hibernate-core:5.2.17.Final')
-    compile('org.hibernate:hibernate-entitymanager:5.2.17.Final')
-    compile('org.hibernate:hibernate-ehcache:5.2.17.Final')
-    compile('org.hibernate:hibernate-validator:5.4.2.Final')
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
+    implementation("com.fasterxml.jackson.core:jackson-core:2.12.5")
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.12.5")
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.5")
 
-    compile('org.hibernate:hibernate-search-engine:5.9.1.Final')
-    compile('org.hibernate:hibernate-search-orm:5.9.1.Final')
-    compile('org.apache.lucene:lucene-core:5.5.5')
-    compile('org.apache.lucene:lucene-analyzers-common:5.5.5')
-    compile('org.apache.lucene:lucene-analyzers-phonetic:5.5.5')
-    compile('org.apache.lucene:lucene-facet:5.5.5')
-    compile('org.apache.lucene:lucene-highlighter:5.5.5')
-    compile('org.apache.lucene:lucene-join:5.5.5')
-    compile('org.apache.lucene:lucene-memory:5.5.5')
-    compile('org.apache.lucene:lucene-misc:5.5.5')
-    compile('org.apache.lucene:lucene-queries:5.5.5')
-    compile('org.apache.lucene:lucene-queryparser:5.5.5')
+    // https://mvnrepository.com/artifact/com.auth0/java-jwt
+    implementation("com.auth0:java-jwt:3.18.2")
 
-    compile('com.github.dnault:xml-patch:0.3.1'){
+    implementation('org.hibernate:hibernate-core:5.5.5.Final')
+    implementation('org.hibernate:hibernate-entitymanager:5.5.5.Final')
+    implementation('org.hibernate:hibernate-ehcache:5.5.5.Final')
+    implementation('org.hibernate:hibernate-validator:5.4.2.Final')
+
+    implementation('org.hibernate:hibernate-search-engine:5.11.9.Final')
+    implementation('org.hibernate:hibernate-search-orm:5.11.9.Final')
+    implementation('org.apache.lucene:lucene-core:5.5.5')
+    implementation('org.apache.lucene:lucene-analyzers-common:5.5.5')
+    implementation('org.apache.lucene:lucene-analyzers-phonetic:5.5.5')
+    implementation('org.apache.lucene:lucene-facet:5.5.5')
+    implementation('org.apache.lucene:lucene-highlighter:5.5.5')
+    implementation('org.apache.lucene:lucene-join:5.5.5')
+    implementation('org.apache.lucene:lucene-memory:5.5.5')
+    implementation('org.apache.lucene:lucene-misc:5.5.5')
+    implementation('org.apache.lucene:lucene-queries:5.5.5')
+    implementation('org.apache.lucene:lucene-queryparser:5.5.5')
+
+    implementation('com.github.dnault:xml-patch:0.3.1'){
         force = true
     }
 
-    runtime('com.h2database:h2')
-    compileOnly('org.projectlombok:lombok')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
+    runtimeOnly('com.h2database:h2')
+    compileOnly('org.projectlombok:lombok:1.18.20')
+    testImplementation('org.springframework.boot:spring-boot-starter-test:2.2.0.RELEASE')
 }
