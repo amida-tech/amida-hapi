@@ -1,6 +1,6 @@
 # Amida-Hapi
 
-This is a basic restful Hapi server using Hapi and set up against dstu2.  
+This is a basic restful Hapi server using Hapi and set up against dstu2.
 
 ## Application Settings
 
@@ -14,18 +14,19 @@ in /src/main/resources copy application.yml.example to application.yml. Set enab
 
 first build
 
-``docker build -t amida-hapi .`` 
+``docker build -t amida-hapi .``
 
 ## Create an instance from the image
+
 By default the image will list on 8080  with a root path of /fhir
 
 ``docker run --name my-hapi -p 8080:8080 amida-hapi``
 
-you should then be able to go to 
+you should then be able to go to
 
-http://localhost:8087/fhir/metadata?_format=json 
+``http://localhost:8080/fhir/metadata?_format=json``
 
-to pull down the metadata statement.  
+to pull down the metadata statement.
 
 This project by default populates with an initial sert of data.  If you wish to override this mount a directory at /var/hapi/init with the resources you wish to populate with.
 
