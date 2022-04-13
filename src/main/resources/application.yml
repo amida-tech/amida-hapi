@@ -24,6 +24,7 @@ spring:
 hapi:
   fhir:
     version: r4
+    allow-external-references: true
     rest:
       server-name: hapi-fhir-spring-boot-sample-server-jpa
       server-version: 1.0.0
@@ -39,7 +40,7 @@ hapi:
       subscription-enabled: false
     server:
       path: /fhir/*
-      url: http://localhost:8087/fhir/
+      url: http://localhost:8080/fhir/
 management:
   security:
     enabled: false

@@ -1,0 +1,25 @@
+{
+    "resourceType": "Medication",
+    "id": "Medication/1",
+    "text": {
+        "status": "additional",
+        "div": "<div>Hydrochlorothiazide 25 MG</div>"
+    },
+    "identifier": [
+        {
+            "id": "316049"
+        }
+    ],
+    "code": {
+        "coding": [
+            {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "display": "Hydrochlorothiazide 25 MG"
+            }
+        ],
+        "text": "Hydrochlorothiazide 25 MG"
+    },
+    "form": {
+        "text": "1 dose(s) 1 time(s) per 1 days"
+    }
+}

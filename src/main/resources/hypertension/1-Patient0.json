@@ -1,0 +1,161 @@
+{
+    "resourceType": "Patient",
+    "id": "Patient/1",
+    "extension": [
+        {
+            "extension": [
+                {
+                    "url": "ombCategory",
+                    "valueCoding": {
+                        "system": "https://www.hl7.org/fhir/us/core/CodeSystem-cdcrec.html",
+                        "code": "2106-3",
+                        "display": "White"
+                    }
+                },
+                {
+                    "url": "text",
+                    "valueString": "White"
+                }
+            ],
+            "url": "https://www.hl7.org/fhir/us/core/StructureDefinition-us-core-race"
+        },
+        {
+            "extension": [
+                {
+                    "url": "ombCategory",
+                    "valueCoding": {
+                        "system": "https://www.hl7.org/fhir/us/core/CodeSystem-cdcrec.html",
+                        "code": "0000-0",
+                        "display": "DECLINED TO ANSWER"
+                    }
+                },
+                {
+                    "url": "text",
+                    "valueString": "DECLINED TO ANSWER"
+                }
+            ],
+            "url": "https://www.hl7.org/fhir/us/core/StructureDefinition-us-core-ethnicity"
+        },
+        {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+            "valueCode": "M"
+        }
+    ],
+    "identifier": [
+        {
+            "use": "usual",
+            "type": {
+                "coding": [
+                    {
+                        "system": "http://hl7.org/fhir/v2/0203",
+                        "code": "MR"
+                    }
+                ]
+            },
+            "system": "http://va.gov/mpi",
+            "value": "1000005",
+            "assigner": {
+                "display": "Master Patient Index"
+            }
+        },
+        {
+            "use": "official",
+            "type": {
+                "coding": [
+                    {
+                        "system": "http://hl7.org/fhir/v2/0203",
+                        "code": "SB"
+                    }
+                ]
+            },
+            "system": "http://hl7.org/fhir/sid/us-ssn",
+            "value": "999-28-8359",
+            "assigner": {
+                "display": "United States Social Security Number"
+            }
+        }
+    ],
+    "name": [
+        {
+            "use": "usual",
+            "text": "Mr. Shane235 Bartell116",
+            "family": "Bartell116",
+            "given": [
+                "Shane235"
+            ]
+        }
+    ],
+    "telecom": [
+        {
+            "system": "phone",
+            "value": "5557851155",
+            "use": "mobile"
+        }
+    ],
+    "gender": "male",
+    "birthDate": "1958-11-10",
+    "deceasedDateTime": "2007-11-01T04:56:37Z",
+    "address": [
+        {
+            "line": [
+                "364 Satterfield Meadow"
+            ],
+            "city": "Anchorage",
+            "state": "AK",
+            "postalCode": "99501"
+        }
+    ],
+    "maritalStatus": {
+        "coding": [
+            {
+                "system": "http://hl7.org/fhir/marital-status",
+                "code": "M",
+                "display": "Married"
+            }
+        ],
+        "text": "Married"
+    },
+    "contact": [
+        {
+            "relationship": [
+                {
+                    "coding": [
+                        {
+                            "system": "http://hl7.org/fhir/patient-contact-relationship",
+                            "code": "family",
+                            "display": "Family"
+                        }
+                    ],
+                    "text": "NEXT OF KIN"
+                }
+            ],
+            "name": {
+                "text": "Will287, Farrah405"
+            },
+            "telecom": [
+                {
+                    "system": "phone",
+                    "value": "5559770393",
+                    "use": "home"
+                },
+                {
+                    "system": "phone",
+                    "value": "5556492437",
+                    "use": "work"
+                }
+            ],
+            "address": {
+                "line": [
+                    "83275 Miriam Parks",
+                    "Apt. 249"
+                ],
+                "city": "Balistreribury",
+                "state": "IA",
+                "postalCode": "26207-0894"
+            }
+        }
+    ],
+    "managingOrganization": {
+        "reference": "Organization/1"
+    }
+}

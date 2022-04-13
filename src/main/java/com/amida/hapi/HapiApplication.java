@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 
 import java.io.File;
 import java.io.FileReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -39,10 +40,9 @@ public class HapiApplication {
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
-//            FileResource fs =
             File dir = new File("/var/hapi/init");
             if (!dir.exists())
-                dir = new File(ctx.getClassLoader().getResource("samples").getFile());
+                dir = new File(ctx.getClassLoader().getResource("hypertension").getFile());
 
             if (dir.isDirectory()){
                 File[] files = dir.listFiles();
@@ -53,8 +53,7 @@ public class HapiApplication {
 
                         System.out.println(f.getName());
                         try{
-//                            FileReader reader = new FileReader(f);
-                            String fileBody = FileUtils.readFileToString(f);
+                            String fileBody = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
                             for (String tempId: idMap.keySet()){
                                 fileBody = fileBody.replaceAll("\""+tempId+"\"", "\""+idMap.get(tempId)+"\"");
                             }
@@ -63,9 +62,7 @@ public class HapiApplication {
 
                             if (validation.isSuccessful()){
                                 String origId = resource.getIdElement().toString();
-                                MethodOutcome outcome = client.create()
-                                        .resource(resource)
-                                        .execute();
+                                MethodOutcome outcome = client.create().resource(resource).execute();
                                 System.out.println(outcome.getCreated());
                                 String id = outcome.getId().toUnqualifiedVersionless().toString();
                                 if (!id.equalsIgnoreCase(origId)){

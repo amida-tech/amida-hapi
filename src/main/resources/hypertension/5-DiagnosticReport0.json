@@ -1,0 +1,36 @@
+{
+    "resourceType": "DiagnosticReport",
+    "id": "DiagnosticReport/1",
+    "status": "final",
+    "category": [
+        {
+            "coding": [
+                {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                    "code": "LAB",
+                    "display": "Laboratory"
+                }
+            ],
+            "text": "Laboratory"
+        }
+    ],
+    "code": {
+        "text": "panel"
+    },
+    "subject": {
+        "reference": "Patient/1",
+        "display": "Mr. Shane235 Bartell116"
+    },
+    "effectiveDateTime": "2000-03-20T05:56:37Z",
+    "issued": "2000-03-20T05:56:37Z",
+    "result": [
+        {
+            "reference": "Observation/1",
+            "display": "Leukocytes [#/volume] in Blood by Automated count"
+        },
+        {
+            "reference": "Observation/2",
+            "display": "MCHC [Mass/volume] by Automated count"
+        }
+    ]
+}

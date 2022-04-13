@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.1.1.RELEASE'
+        springBootVersion = '2.1.9.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -25,48 +25,48 @@ repositories {
 
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-actuator')
-    compile('org.springframework.boot:spring-boot-starter-data-jpa')
-    compile('org.springframework.boot:spring-boot-starter-web')
-    compile('org.springframework.boot:spring-boot-starter-jersey')
-    compile('org.springframework.boot:spring-boot-configuration-processor')
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation('org.springframework.boot:spring-boot-starter-jersey')
+    implementation('org.springframework.boot:spring-boot-configuration-processor')
 
     // to support R4 final we need to upgrade to 3.7.0 or above 
     // 3.8.0 is the last release in the 3 series 4.1.0 is current release
     // https://hapifhir.io/hapi-fhir/docs/introduction/versions.html
     // https://mvnrepository.com/artifact/ca.uhn.hapi.fhir/hapi-fhir-spring-boot-starter
-    compile('ca.uhn.hapi.fhir:hapi-fhir-spring-boot-starter:3.8.0')
-    compile('ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:3.8.0')
-    compile('ca.uhn.hapi.fhir:hapi-fhir-jaxrsserver-base:3.8.0')
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-spring-boot-starter:3.8.0')
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:3.8.0')
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-jaxrsserver-base:3.8.0')
     // compile('ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:3.8.0')
     // compile('ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu3:3.8.0')
-    compile('ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:3.8.0')
-    compile('ca.uhn.hapi.fhir:hapi-fhir-structures-r4:3.8.0')
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:3.8.0')
+    implementation('ca.uhn.hapi.fhir:hapi-fhir-structures-r4:3.8.0')
 
 
-    compile('org.hibernate:hibernate-core:5.2.17.Final')
-    compile('org.hibernate:hibernate-entitymanager:5.2.17.Final')
-    compile('org.hibernate:hibernate-ehcache:5.2.17.Final')
-    compile('org.hibernate:hibernate-validator:5.4.2.Final')
+    implementation('org.hibernate:hibernate-core:5.2.17.Final')
+    implementation('org.hibernate:hibernate-entitymanager:5.2.17.Final')
+    implementation('org.hibernate:hibernate-ehcache:5.2.17.Final')
+    implementation('org.hibernate:hibernate-validator:5.4.2.Final')
 
-    compile('org.hibernate:hibernate-search-engine:5.9.1.Final')
-    compile('org.hibernate:hibernate-search-orm:5.9.1.Final')
-    compile('org.apache.lucene:lucene-core:5.5.5')
-    compile('org.apache.lucene:lucene-analyzers-common:5.5.5')
-    compile('org.apache.lucene:lucene-analyzers-phonetic:5.5.5')
-    compile('org.apache.lucene:lucene-facet:5.5.5')
-    compile('org.apache.lucene:lucene-highlighter:5.5.5')
-    compile('org.apache.lucene:lucene-join:5.5.5')
-    compile('org.apache.lucene:lucene-memory:5.5.5')
-    compile('org.apache.lucene:lucene-misc:5.5.5')
-    compile('org.apache.lucene:lucene-queries:5.5.5')
-    compile('org.apache.lucene:lucene-queryparser:5.5.5')
+    implementation('org.hibernate:hibernate-search-engine:5.9.1.Final')
+    implementation('org.hibernate:hibernate-search-orm:5.9.1.Final')
+    implementation('org.apache.lucene:lucene-core:5.5.5')
+    implementation('org.apache.lucene:lucene-analyzers-common:5.5.5')
+    implementation('org.apache.lucene:lucene-analyzers-phonetic:5.5.5')
+    implementation('org.apache.lucene:lucene-facet:5.5.5')
+    implementation('org.apache.lucene:lucene-highlighter:5.5.5')
+    implementation('org.apache.lucene:lucene-join:5.5.5')
+    implementation('org.apache.lucene:lucene-memory:5.5.5')
+    implementation('org.apache.lucene:lucene-misc:5.5.5')
+    implementation('org.apache.lucene:lucene-queries:5.5.5')
+    implementation('org.apache.lucene:lucene-queryparser:5.5.5')
 
-    compile('com.github.dnault:xml-patch:0.3.1'){
+    implementation('com.github.dnault:xml-patch:0.3.1'){
         force = true
     }
 
-    runtime('com.h2database:h2')
+    runtimeOnly('com.h2database:h2')
     compileOnly('org.projectlombok:lombok')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
 }

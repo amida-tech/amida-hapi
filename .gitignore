@@ -30,3 +30,4 @@
 /ca.uhn*
 /target
 .vscode/settings.json
+/bin
