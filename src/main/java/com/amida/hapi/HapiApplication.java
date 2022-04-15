@@ -70,12 +70,12 @@ public class HapiApplication extends SpringBootServletInitializer {
         restfulServer.registerInterceptor(new IgiaExceptionHandlingInterceptor());
 
 
-        FhirContext dstu2 = restfulServer.getFhirContext();
-        jsonParser = dstu2.newJsonParser();
-        validator = dstu2.newValidator();
-        client = dstu2.newRestfulGenericClient(hapiInternalUrl + "/fhir");
+        FhirContext r4 = restfulServer.getFhirContext();
+        jsonParser = r4.newJsonParser();
+        validator = r4.newValidator();
+        client = r4.newRestfulGenericClient(hapiInternalUrl + "/fhir");
 
-        SecurityConfig.setFhirContext(dstu2);
+        SecurityConfig.setFhirContext(r4);
 
         return args -> {
 //            FileResource fs =

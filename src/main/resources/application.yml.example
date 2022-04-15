@@ -38,7 +38,7 @@ spring:
 
 hapi:
   fhir:
-    version: dstu2
+    version: r4
     rest:
       server-name: hapi-fhir-spring-boot-sample-server-jpa
       server-version: 1.0.0

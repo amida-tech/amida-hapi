@@ -30,3 +30,4 @@
 /ca.uhn*
 /target
 /src/main/resources/application.yml
+/bin
