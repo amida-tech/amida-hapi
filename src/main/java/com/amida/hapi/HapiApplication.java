@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.client.resource.BaseOAuth2ProtectedRe
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -70,7 +71,7 @@ public class HapiApplication extends SpringBootServletInitializer {
         restfulServer.registerInterceptor(new IgiaExceptionHandlingInterceptor());
 
 
-        FhirContext r4 = restfulServer.getFhirContext();
+        FhirContext r4 = FhirContext.forR4();
         jsonParser = r4.newJsonParser();
         validator = r4.newValidator();
         client = r4.newRestfulGenericClient(hapiInternalUrl + "/fhir");
@@ -81,7 +82,7 @@ public class HapiApplication extends SpringBootServletInitializer {
 //            FileResource fs =
             File dir = new File("/var/hapi/init");
             if (!dir.exists()) {
-                dir = new File(ctx.getClassLoader().getResource("samples").getFile());
+                dir = new File(ctx.getClassLoader().getResource("hypertension").getFile());
             }
 
             if (dir.isDirectory()) {
@@ -102,7 +103,7 @@ public class HapiApplication extends SpringBootServletInitializer {
                 System.out.println(f.getName());
                 try {
 //                            FileReader reader = new FileReader(f);
-                    String fileBody = FileUtils.readFileToString(f);
+                    String fileBody = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
                     for (String tempId : idMap.keySet()) {
                         fileBody = fileBody.replaceAll("\"" + tempId + "\"", "\"" + idMap.get(tempId) + "\"");
                     }

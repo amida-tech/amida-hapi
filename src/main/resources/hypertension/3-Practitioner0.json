@@ -1,0 +1,82 @@
+{
+    "resourceType": "Practitioner",
+    "id": "Practitioner/1",
+    "identifier": [
+        {
+            "use": "usual",
+            "type": {
+                "coding": [
+                    {
+                        "system": "http://hl7.org/fhir/v2/0203",
+                        "code": "MR"
+                    }
+                ]
+            },
+            "system": "http://va.gov/mpi",
+            "value": "1015517260V990420",
+            "assigner": {
+                "display": "Master Patient Index"
+            }
+        },
+        {
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "1932127842"
+        }
+    ],
+    "active": true,
+    "name": [
+        {
+            "family": "DOE922",
+            "given": [
+                "JANE460"
+            ],
+            "prefix": [
+                "DR."
+            ],
+            "suffix": [
+                "MD"
+            ]
+        }
+    ],
+    "telecom": [
+        {
+            "system": "phone",
+            "value": "555-555-1137",
+            "use": "work"
+        },
+        {
+            "system": "phone",
+            "value": "555-4055",
+            "use": "home"
+        },
+        {
+            "system": "pager",
+            "value": "5-541",
+            "use": "mobile"
+        }
+    ],
+    "address": [
+        {
+            "line": [
+                "555 E 5TH ST",
+                "SUITE B"
+            ],
+            "city": "CHEYENNE",
+            "state": "WYOMING",
+            "postalCode": "82001",
+            "period": {
+                "start": "2010-01-01",
+                "end": "2015-04-02"
+            }
+        }
+    ],
+    "gender": "female",
+    "birthDate": "1964-02-23",
+    "qualification": [
+        {
+            "code": {
+                "text": "MD"
+            }
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+{
+    "resourceType": "Organization",
+    "id": "Organization/2",
+    "identifier": [
+        {
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "1396794293"
+        }
+    ],
+    "active": true,
+    "name": "LYONS- VA NEW JERSEY HCS",
+    "address": [
+        {
+            "text": "151 KNOLLCROFT ROAD LYONS NJ 07939-5001",
+            "line": [
+                "151 KNOLLCROFT ROAD"
+            ],
+            "city": "LYONS",
+            "state": "NJ",
+            "postalCode": "07939-5001"
+        }
+    ]
+}

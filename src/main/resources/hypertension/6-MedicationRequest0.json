@@ -1,0 +1,47 @@
+{
+    "resourceType": "MedicationRequest",
+    "id": "MedicationRequest/1",
+    "status": "active",
+    "intent": "plan",
+    "reportedBoolean": true,
+    "medicationReference": {
+        "reference": "Medication/1",
+        "display": "Hydrochlorothiazide 25 MG"
+    },
+    "subject": {
+        "reference": "Patient/2",
+        "display": "Mr. Hoyt490 Fritsch593"
+    },
+    "authoredOn": "2004-05-05T02:50:50Z",
+    "_requester": {
+        "extension": [
+            {
+                "url": "https://hl7.org/fhir/extension-data-absent-reason.html",
+                "valueCode": "unknown"
+            }
+        ]
+    },
+    "note": [
+        {
+            "text": "Hydrochlorothiazide 25 MG"
+        }
+    ],
+    "dosageInstruction": [
+        {
+            "text": "1 dose(s) 1 time(s) per 1 days",
+            "timing": {
+                "repeat": {
+                    "boundsPeriod": {
+                        "start": "2004-05-05T02:50:50Z"
+                    }
+                },
+                "code": {
+                    "text": "As directed by physician."
+                }
+            },
+            "route": {
+                "text": "As directed by physician."
+            }
+        }
+    ]
+}

@@ -1,0 +1,164 @@
+{
+    "resourceType": "Patient",
+    "id": "Patient/2",
+    "extension": [
+        {
+            "extension": [
+                {
+                    "url": "ombCategory",
+                    "valueCoding": {
+                        "system": "https://www.hl7.org/fhir/us/core/CodeSystem-cdcrec.html",
+                        "code": "2106-3",
+                        "display": "White"
+                    }
+                },
+                {
+                    "url": "text",
+                    "valueString": "White"
+                }
+            ],
+            "url": "https://www.hl7.org/fhir/us/core/StructureDefinition-us-core-race"
+        },
+        {
+            "extension": [
+                {
+                    "url": "ombCategory",
+                    "valueCoding": {
+                        "system": "https://www.hl7.org/fhir/us/core/CodeSystem-cdcrec.html",
+                        "code": "*Unknown at this time*",
+                        "display": "*Unknown at this time*"
+                    }
+                },
+                {
+                    "url": "text",
+                    "valueString": "*Unknown at this time*"
+                }
+            ],
+            "url": "https://www.hl7.org/fhir/us/core/StructureDefinition-us-core-ethnicity"
+        },
+        {
+            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+            "valueCode": "M"
+        }
+    ],
+    "identifier": [
+        {
+            "use": "usual",
+            "type": {
+                "coding": [
+                    {
+                        "system": "http://hl7.org/fhir/v2/0203",
+                        "code": "MR"
+                    }
+                ]
+            },
+            "system": "http://va.gov/mpi",
+            "value": "129",
+            "assigner": {
+                "display": "Master Patient Index"
+            }
+        },
+        {
+            "use": "official",
+            "type": {
+                "coding": [
+                    {
+                        "system": "http://hl7.org/fhir/v2/0203",
+                        "code": "SB"
+                    }
+                ]
+            },
+            "system": "http://hl7.org/fhir/sid/us-ssn",
+            "value": "999-91-4144",
+            "assigner": {
+                "display": "United States Social Security Number"
+            }
+        }
+    ],
+    "name": [
+        {
+            "use": "usual",
+            "text": "Mr. Hoyt490 Fritsch593",
+            "family": "Fritsch593",
+            "given": [
+                "Hoyt490"
+            ]
+        }
+    ],
+    "telecom": [
+        {
+            "system": "phone",
+            "value": "5551811650",
+            "use": "mobile"
+        }
+    ],
+    "gender": "male",
+    "birthDate": "1976-03-24",
+    "deceasedBoolean": false,
+    "address": [
+        {
+            "line": [
+                "166 Grady Ville"
+            ],
+            "city": "Guntersville",
+            "state": "AL",
+            "postalCode": "35950"
+        }
+    ],
+    "maritalStatus": {
+        "coding": [
+            {
+                "system": "http://hl7.org/fhir/marital-status",
+                "code": "M",
+                "display": "Married"
+            }
+        ],
+        "text": "Married"
+    },
+    "contact": [
+        {
+            "relationship": [
+                {
+                    "coding": [
+                        {
+                            "system": "http://hl7.org/fhir/patient-contact-relationship",
+                            "code": "family",
+                            "display": "Family"
+                        }
+                    ],
+                    "text": "NEXT OF KIN"
+                }
+            ],
+            "name": {
+                "text": "Jerde79, Eddy81"
+            },
+            "telecom": [
+                {
+                    "system": "phone",
+                    "value": "5556676634",
+                    "use": "home"
+                },
+                {
+                    "system": "phone",
+                    "value": "5558891324",
+                    "use": "work"
+                },
+                {
+                    "system": "email",
+                    "value": "yelena.lesch@example.com"
+                }
+            ],
+            "address": {
+                "line": [
+                    "7179 Littel Hollow"
+                ],
+                "city": "East Coleberg",
+                "state": "NM",
+                "postalCode": "45004-3950"
+            }
+        }
+    ],
+    "managingOrganization": {
+        "reference": "Organization/2"
+    }
+}
